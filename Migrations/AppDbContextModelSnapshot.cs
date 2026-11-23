@@ -21,6 +21,62 @@ namespace TodoApi.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("KategoriProduk", b =>
+                {
+                    b.Property<int>("KategorisId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ProduksId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("KategorisId", "ProduksId");
+
+                    b.HasIndex("ProduksId");
+
+                    b.ToTable("ProdukKategori", (string)null);
+                });
+
+            modelBuilder.Entity("TodoApi.Models.Gudang", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Alamat")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("NamaGudang")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Gudang");
+                });
+
+            modelBuilder.Entity("TodoApi.Models.Kategori", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("NamaKategori")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Kategoris");
+                });
+
             modelBuilder.Entity("TodoApi.Models.Produk", b =>
                 {
                     b.Property<int>("Id")
@@ -28,6 +84,9 @@ namespace TodoApi.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("GudangId")
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("Harga")
                         .HasColumnType("numeric");
@@ -42,7 +101,79 @@ namespace TodoApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Produks");
+                    b.HasIndex("GudangId");
+
+                    b.HasIndex("NamaProduk")
+                        .IsUnique();
+
+                    b.ToTable("Produks", t =>
+                        {
+                            t.HasCheckConstraint("CK_Produks_Harga_Positive", "\"Harga\" > 0");
+
+                            t.HasCheckConstraint("CK_Produks_Stok_NonNegative", "\"Stok\" >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("TodoApi.Models.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<string>("Nama")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("KategoriProduk", b =>
+                {
+                    b.HasOne("TodoApi.Models.Kategori", null)
+                        .WithMany()
+                        .HasForeignKey("KategorisId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TodoApi.Models.Produk", null)
+                        .WithMany()
+                        .HasForeignKey("ProduksId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TodoApi.Models.Produk", b =>
+                {
+                    b.HasOne("TodoApi.Models.Gudang", "Gudang")
+                        .WithMany("Produks")
+                        .HasForeignKey("GudangId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Gudang");
+                });
+
+            modelBuilder.Entity("TodoApi.Models.Gudang", b =>
+                {
+                    b.Navigation("Produks");
                 });
 #pragma warning restore 612, 618
         }

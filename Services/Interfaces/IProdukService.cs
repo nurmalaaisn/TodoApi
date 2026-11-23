@@ -1,6 +1,7 @@
 using TodoApi.DTOs;
+using TodoApi.Models;
 
-namespace TodoApi.Services;
+namespace TodoApi.Services.Interfaces;
 
 public interface IProdukService
 {
@@ -18,4 +19,6 @@ public interface IProdukService
     Task<ProdukResponseDto> CreateAsync(CreateProdukDto dto);
     Task UpdateAsync(int id, UpdateProdukDto dto);
     Task DeleteAsync(int id);
+    Task AssignKategoriAsync(int produkId, AssignKategoriDto dto);
+    Task<ProdukKategoriResponseDto> GetByIdWithCategoriesAsync(int id);
 }

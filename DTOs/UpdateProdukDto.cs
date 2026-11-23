@@ -1,6 +1,8 @@
+
 using System.ComponentModel.DataAnnotations;
 
 namespace TodoApi.DTOs;
+
 public class UpdateProdukDto
 {
     [Required]
@@ -12,4 +14,7 @@ public class UpdateProdukDto
 
     [Range(0, int.MaxValue)]
     public int Stok { get; set; }
+
+    [Range(1, int.MaxValue)]
+    public int GudangId { get; set; }
 }

@@ -2,8 +2,51 @@ using Microsoft.EntityFrameworkCore;
 using TodoApi.Data;
 using TodoApi.Services;
 using TodoApi.Middleware;
+using TodoApi.Repositories;
+using TodoApi.Repositories.Interfaces;
+using TodoApi.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.AspNetCore.Identity;
+using TodoApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var jwtSettings = builder.Configuration.GetSection("Jwt");
+
+var secretKey = jwtSettings["Key"]
+    ?? throw new InvalidOperationException("Jwt Key belum dikonfigurasi.");
+
+builder.Services
+    .AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme =
+            JwtBearerDefaults.AuthenticationScheme;
+
+        options.DefaultChallengeScheme =
+            JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer( options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+
+            ValidIssuer = jwtSettings["Issuer"],
+            ValidAudience = jwtSettings["Audience"],
+
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(secretKey)
+            ),
+
+            ClockSkew = TimeSpan.Zero
+        };
+    }
+    );
 
 var connectionString = builder.Configuration
     .GetConnectionString("DefaultConnection")
@@ -14,7 +57,15 @@ var connectionString = builder.Configuration
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
+builder.Services.AddScoped<IProdukRepository, ProdukRepository>();
+builder.Services.AddScoped<IGudangRepository, GudangRepository>();
 builder.Services.AddScoped<IProdukService, ProdukService>();
+builder.Services.AddScoped<IGudangService, GudangService>();
+builder.Services.AddScoped<IKategoriRepository, KategoriRepository>();
+builder.Services.AddScoped<IKategoriService, KategoriService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddControllers();
 
@@ -23,6 +74,9 @@ var app = builder.Build();
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
 app.MapControllers();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 // app.MapGet("/", () => "Hello World!");
 // app.MapGet("/about", () => "Day One Prakerin di 3PM Solution.");

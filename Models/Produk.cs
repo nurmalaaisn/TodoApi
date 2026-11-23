@@ -14,4 +14,9 @@ public class Produk
 
     [Range(0, int.MaxValue)]
     public int Stok { get; set; }
+
+    public int GudangId { get; set; }
+    public Gudang Gudang { get; set; } = null!;
+
+    public ICollection<Kategori> Kategoris { get; set; } = new List<Kategori>();
 }

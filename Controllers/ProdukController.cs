@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using TodoApi.DTOs;
 using TodoApi.Services;
 using TodoApi.Exceptions;
+using TodoApi.Services.Interfaces;
 
 namespace TodoApi.Controllers;
 
@@ -76,6 +77,13 @@ public class ProdukController : ControllerBase
         return Ok(produk);
     }
 
+    [HttpGet("{id:int}/kategori")]
+    public async Task<IActionResult> GetByIdWithCategories(int id)
+    {
+        var result = await _produkService.GetByIdWithCategoriesAsync(id);
+        return Ok(result);
+    }
+
     [HttpGet("test-error")]
     public IActionResult TestError()
     {
@@ -124,6 +132,21 @@ public class ProdukController : ControllerBase
             message = "Produk berhasil diperbarui."
         });
     }
+
+
+    [HttpPut("{id:int}/kategori")]
+    public async Task<IActionResult> AssignKategori(
+        int id,
+        AssignKategoriDto dto)
+    {
+        await _produkService.AssignKategoriAsync(id, dto);
+
+        return Ok(new
+        {
+            message = "Kategori berhasil dihubungkan dengan produk."
+        });
+    }
+
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
