@@ -10,4 +10,6 @@ public interface IKategoriService
     Task<KategoriResponseDto> CreateAsync(CreateKategoriDto dto);
 
     Task<KategoriDetailResponseDto> GetDetailAsync(int id);
+    Task<KategoriResponseDto> UpdateAsync(int id, UpdateKategoriDto dto);
+    Task DeleteAsync(int id);
 }

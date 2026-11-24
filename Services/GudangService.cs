@@ -99,5 +99,70 @@ public class GudangService : IGudangService
                 Stok = p.Stok
             }).ToList()
         };
+
+
     }
+
+
+    public async Task<GudangResponseDto> UpdateAsync(
+        int id,
+        UpdateGudangDto dto)
+    {
+        var gudang = await _gudangRepository.GetByIdAsync(id);
+
+        if (gudang == null)
+        {
+            throw new NotFoundException(
+                $"Gudang dengan ID {id} tidak ditemukan."
+            );
+        }
+
+        var exists = await _gudangRepository.ExistsByNameAsync(
+            dto.NamaGudang
+        );
+
+        if (exists && gudang.NamaGudang != dto.NamaGudang)
+        {
+            throw new ConflictException(
+                "Nama gudang sudah digunakan."
+            );
+        }
+
+        gudang.NamaGudang = dto.NamaGudang;
+        gudang.Alamat = dto.Alamat;
+        var updatedGudang = await _gudangRepository.UpdateAsync(gudang);
+
+        return new GudangResponseDto
+        {
+            Id = updatedGudang.Id,
+            NamaGudang = updatedGudang.NamaGudang,
+            Alamat = updatedGudang.Alamat
+        };
+    }
+
+
+    public async Task DeleteAsync(int id)
+    {
+        var gudang = await _gudangRepository.GetByIdAsync(id);
+
+        if (gudang == null)
+        {
+            throw new NotFoundException(
+                $"Gudang dengan ID {id} tidak ditemukan."
+            );
+        }
+
+        var hasProducts = await _gudangRepository.HasProductsAsync(id);
+
+        if (hasProducts)
+        {
+            throw new ConflictException(
+                "Gudang tidak dapat dihapus karena masih memiliki produk."
+            );
+        }
+
+        await _gudangRepository.DeleteAsync(gudang);
+    }
+
+
 }

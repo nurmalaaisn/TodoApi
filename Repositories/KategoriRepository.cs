@@ -41,9 +41,36 @@ public class KategoriRepository : IKategoriRepository
         return kategori;
     }
 
-    public async Task<bool> ExistsByNameAsync(string namaKategori)
+    public async Task<bool> ExistsByNameAsync(
+    string namaKategori,
+    int? excludeId = null)
     {
-        return await _context.Kategoris
-            .AnyAsync(k => k.NamaKategori == namaKategori);
+        var query = _context.Kategoris
+            .Where(k => k.NamaKategori == namaKategori);
+
+        if (excludeId.HasValue)
+        {
+            query = query.Where(k => k.Id != excludeId.Value);
+        }
+
+        return await query.AnyAsync();
+    }
+
+    public async Task<Kategori> UpdateAsync(Kategori kategori)
+    {
+        _context.Kategoris.Update(kategori);
+
+        await _context.SaveChangesAsync();
+
+        return kategori;
+    }
+
+    public async Task<bool> DeleteAsync(Kategori kategori)
+    {
+        _context.Kategoris.Remove(kategori);
+
+        await _context.SaveChangesAsync();
+
+        return true;
     }
 }

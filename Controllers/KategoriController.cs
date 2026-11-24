@@ -1,10 +1,11 @@
-
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TodoApi.DTOs;
 using TodoApi.Services.Interfaces;
 
 namespace TodoApi.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class KategoriController : ControllerBase
@@ -24,6 +25,15 @@ public class KategoriController : ControllerBase
         return Ok(kategoris);
     }
 
+    [HttpGet("{id:int}/detail")]
+    public async Task<ActionResult<KategoriDetailResponseDto>> GetDetail(int id)
+    {
+        var kategori = await _kategoriService.GetDetailAsync(id);
+
+        return Ok(kategori);
+    }
+
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<ActionResult<KategoriResponseDto>> Create(
         CreateKategoriDto dto)
@@ -37,11 +47,31 @@ public class KategoriController : ControllerBase
         );
     }
 
-    [HttpGet("{id:int}/detail")]
-    public async Task<ActionResult<KategoriDetailResponseDto>> GetDetail(int id)
+    [Authorize(Roles = "Admin")]
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update(
+    int id,
+    [FromBody] UpdateKategoriDto dto)
     {
-        var kategori = await _kategoriService.GetDetailAsync(id);
+        var kategori = await _kategoriService.UpdateAsync(id, dto);
 
-        return Ok(kategori);
+        return Ok(new
+        {
+            message = "Kategori berhasil diperbarui.",
+            data = kategori
+        });
     }
+
+    [Authorize(Roles = "Admin")]
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        await _kategoriService.DeleteAsync(id);
+
+        return Ok(new
+        {
+            message = "Kategori berhasil dihapus."
+        });
+    }
+
 }

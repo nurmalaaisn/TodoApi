@@ -1,12 +1,12 @@
-using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TodoApi.DTOs;
-using TodoApi.Services;
 using TodoApi.Exceptions;
 using TodoApi.Services.Interfaces;
 
 namespace TodoApi.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class ProdukController : ControllerBase
@@ -73,7 +73,6 @@ public class ProdukController : ControllerBase
     public async Task<IActionResult> GetById(int id)
     {
         var produk = await _produkService.GetByIdAsync(id);
-
         return Ok(produk);
     }
 
@@ -84,30 +83,35 @@ public class ProdukController : ControllerBase
         return Ok(result);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpGet("test-error")]
     public IActionResult TestError()
     {
         throw new Exception("Simulasi kesalahan server.");
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpGet("test-not-found")]
     public IActionResult TestNotFound()
     {
         throw new NotFoundException("Produk tidak ditemukan.");
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpGet("test-bad-request")]
     public IActionResult TestBadRequest()
     {
         throw new BadRequestException("Data yang dikirim tidak valid.");
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpGet("test-conflict")]
     public IActionResult TestConflict()
     {
         throw new ConflictException("Data yang dikirim konflik dengan data yang sudah ada.");
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<IActionResult> Create(CreateProdukDto dto)
     {
@@ -120,6 +124,7 @@ public class ProdukController : ControllerBase
         );
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(
         int id,
@@ -134,6 +139,7 @@ public class ProdukController : ControllerBase
     }
 
 
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id:int}/kategori")]
     public async Task<IActionResult> AssignKategori(
         int id,
@@ -148,6 +154,7 @@ public class ProdukController : ControllerBase
     }
 
 
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {

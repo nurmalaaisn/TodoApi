@@ -70,4 +70,58 @@ public class KategoriService : IKategoriService
             }).ToList()
         };
     }
+
+
+    public async Task<KategoriResponseDto> UpdateAsync(
+        int id,
+        UpdateKategoriDto dto)
+    {
+        var kategori = await _kategoriRepository.GetByIdAsync(id);
+
+        if (kategori == null)
+        {
+            throw new NotFoundException(
+                $"Kategori dengan ID {id} tidak ditemukan."
+            );
+        }
+
+        var exists = await _kategoriRepository.ExistsByNameAsync(
+            dto.NamaKategori,
+            id
+        );
+
+        if (exists)
+        {
+            throw new ConflictException(
+                "Nama kategori sudah digunakan."
+            );
+        }
+
+        kategori.NamaKategori = dto.NamaKategori;
+
+        var updatedKategori = await _kategoriRepository.UpdateAsync(kategori);
+
+        return new KategoriResponseDto
+        {
+            Id = updatedKategori.Id,
+            NamaKategori = updatedKategori.NamaKategori
+        };
+    }
+
+
+    public async Task DeleteAsync(int id)
+    {
+        var kategori = await _kategoriRepository.GetByIdAsync(id);
+
+        if (kategori == null)
+        {
+            throw new NotFoundException(
+                $"Kategori dengan ID {id} tidak ditemukan."
+            );
+        }
+
+
+        await _kategoriRepository.DeleteAsync(kategori);
+    }
+
 }

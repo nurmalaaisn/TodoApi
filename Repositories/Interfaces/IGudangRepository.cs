@@ -13,5 +13,11 @@ public interface IGudangRepository
 
     Task<Gudang> CreateAsync(Gudang gudang);
 
+    Task<Gudang> UpdateAsync(Gudang gudang);
+
+    Task<bool> DeleteAsync(Gudang gudang);
+
     Task<bool> ExistsByNameAsync(string namaGudang);
+
+    Task<bool> HasProductsAsync(int gudangId);
 }

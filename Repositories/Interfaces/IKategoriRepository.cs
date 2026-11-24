@@ -13,5 +13,12 @@ public interface IKategoriRepository
 
     Task<Kategori> CreateAsync(Kategori kategori);
 
-    Task<bool> ExistsByNameAsync(string namaKategori);
+    Task<Kategori> UpdateAsync(Kategori kategori);
+
+    Task<bool> DeleteAsync(Kategori kategori);
+
+    Task<bool> ExistsByNameAsync(
+        string namaKategori,
+        int? excludeId = null
+    );
 }

@@ -71,12 +71,14 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
-app.UseMiddleware<GlobalExceptionMiddleware>();
+await DbSeeder.SeedAsync(app.Services);
 
-app.MapControllers();
+app.UseMiddleware<GlobalExceptionMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapControllers();
 
 // app.MapGet("/", () => "Hello World!");
 // app.MapGet("/about", () => "Day One Prakerin di 3PM Solution.");

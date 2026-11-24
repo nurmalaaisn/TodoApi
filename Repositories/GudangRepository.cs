@@ -42,9 +42,34 @@ public class GudangRepository : IGudangRepository
         return gudang;
     }
 
+    public async Task<Gudang> UpdateAsync(Gudang gudang)
+    {
+        _context.Gudang.Update(gudang);
+
+        await _context.SaveChangesAsync();
+
+        return gudang;
+    }
+
+    public async Task<bool> DeleteAsync(Gudang gudang)
+    {
+        _context.Gudang.Remove(gudang);
+
+        await _context.SaveChangesAsync();
+
+        return true;
+    }
+
+
     public async Task<bool> ExistsByNameAsync(string namaGudang)
     {
         return await _context.Gudang
             .AnyAsync(g => g.NamaGudang == namaGudang);
+    }
+
+    public async Task<bool> HasProductsAsync(int gudangId)
+    {
+        return await _context.Produks
+            .AnyAsync(p => p.GudangId == gudangId);
     }
 }
