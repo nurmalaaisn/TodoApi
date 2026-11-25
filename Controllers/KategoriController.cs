@@ -5,7 +5,6 @@ using TodoApi.Services.Interfaces;
 
 namespace TodoApi.Controllers;
 
-[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class KategoriController : ControllerBase

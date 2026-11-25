@@ -73,25 +73,25 @@ public class ProdukService : IProdukService
     }
 
     public async Task<ProdukKategoriResponseDto> GetByIdWithCategoriesAsync(int id)
-{
-    var produk = await _produkRepository.GetByIdWithCategoriesAsync(id);
-
-    if (produk == null)
-        throw new NotFoundException("Produk tidak ditemukan.");
-
-    return new ProdukKategoriResponseDto
     {
-        Id = produk.Id,
-        NamaProduk = produk.NamaProduk,
-        Harga = produk.Harga,
-        Stok = produk.Stok,
-        Kategoris = produk.Kategoris.Select(k => new KategoriResponseDto
+        var produk = await _produkRepository.GetByIdWithCategoriesAsync(id);
+
+        if (produk == null)
+            throw new NotFoundException("Produk tidak ditemukan.");
+
+        return new ProdukKategoriResponseDto
         {
-            Id = k.Id,
-            NamaKategori = k.NamaKategori
-        }).ToList()
-    };
-}
+            Id = produk.Id,
+            NamaProduk = produk.NamaProduk,
+            Harga = produk.Harga,
+            Stok = produk.Stok,
+            Kategoris = produk.Kategoris.Select(k => new KategoriResponseDto
+            {
+                Id = k.Id,
+                NamaKategori = k.NamaKategori
+            }).ToList()
+        };
+    }
 
     public async Task<ProdukResponseDto> CreateAsync(CreateProdukDto dto)
     {
@@ -102,11 +102,21 @@ public class ProdukService : IProdukService
                 "Produk dengan nama tersebut sudah tersedia."
             );
 
+        // Validasi gudang
+        var gudang = await _gudangRepository.GetByIdAsync(dto.GudangId);
+
+        if (gudang == null)
+            throw new NotFoundException(
+                "Gudang tujuan tidak ditemukan."
+            );
+
+        // Membuat produk
         var produk = new Produk
         {
             NamaProduk = dto.NamaProduk,
             Harga = dto.Harga,
-            Stok = dto.Stok
+            Stok = dto.Stok,
+            GudangId = dto.GudangId
         };
 
         await _produkRepository.AddAsync(produk);
@@ -175,38 +185,38 @@ public class ProdukService : IProdukService
             Stok = produk.Stok
         };
     }
-public async Task AssignKategoriAsync(
-    int produkId,
-    AssignKategoriDto dto)
-{
-    var produk = await _produkRepository
-        .GetByIdWithCategoriesAsync(produkId);
-
-    if (produk == null)
-        throw new NotFoundException("Produk tidak ditemukan.");
-
-    var kategoriIds = dto.KategoriIds.Distinct().ToList();
-
-    foreach (var kategoriId in kategoriIds)
+    public async Task AssignKategoriAsync(
+        int produkId,
+        AssignKategoriDto dto)
     {
-        var kategori = await _kategoriRepository
-            .GetByIdAsync(kategoriId);
+        var produk = await _produkRepository
+            .GetByIdWithCategoriesAsync(produkId);
 
-        if (kategori == null)
-            throw new NotFoundException(
-                $"Kategori dengan ID {kategoriId} tidak ditemukan.");
+        if (produk == null)
+            throw new NotFoundException("Produk tidak ditemukan.");
 
-        var alreadyAssigned = produk.Kategoris
-            .Any(k => k.Id == kategoriId);
+        var kategoriIds = dto.KategoriIds.Distinct().ToList();
 
-        if (!alreadyAssigned)
+        foreach (var kategoriId in kategoriIds)
         {
-            produk.Kategoris.Add(kategori);
-        }
-    }
+            var kategori = await _kategoriRepository
+                .GetByIdAsync(kategoriId);
 
-    _produkRepository.Update(produk);
-    await _produkRepository.SaveChangesAsync();
-}
+            if (kategori == null)
+                throw new NotFoundException(
+                    $"Kategori dengan ID {kategoriId} tidak ditemukan.");
+
+            var alreadyAssigned = produk.Kategoris
+                .Any(k => k.Id == kategoriId);
+
+            if (!alreadyAssigned)
+            {
+                produk.Kategoris.Add(kategori);
+            }
+        }
+
+        _produkRepository.Update(produk);
+        await _produkRepository.SaveChangesAsync();
+    }
 
 }
